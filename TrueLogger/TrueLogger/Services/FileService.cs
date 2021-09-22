@@ -15,12 +15,13 @@ namespace TrueLogger
             File.WriteAllText(path, txt);
         }
 
-        public void WriteLine(string path, string txt)
+        public void WriteLineToFile(IDisposable iDisposable, string txt)
         {
-            using var streamWriter = new StreamWriter(path, true, System.Text.Encoding.Default);
-            streamWriter.AutoFlush = true;
-            streamWriter.WriteLine(txt);
-            streamWriter.Flush();
+            if (iDisposable is StreamWriter streamWriter)
+            {
+                streamWriter.WriteLine(txt);
+                streamWriter.Flush();
+            }
         }
 
         public void MakeFile(string path)
@@ -31,6 +32,22 @@ namespace TrueLogger
             {
                 file.Create().Close();
             }
+        }
+
+        public IDisposable OpenFileStream(string path)
+        {
+            return new StreamWriter(path, true, System.Text.Encoding.Default)
+            {
+                AutoFlush = true
+            };
+        }
+
+        public void CloseFileStream(IDisposable iDisposable)
+        {
+            var streamWriter = iDisposable as StreamWriter;
+
+            streamWriter.Close();
+            streamWriter.Dispose();
         }
 
         public void MakeDir(string path)

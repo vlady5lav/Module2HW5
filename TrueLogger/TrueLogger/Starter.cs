@@ -10,10 +10,10 @@ namespace TrueLogger
         {
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<IConfigService, ConfigService>()
+                .AddSingleton<IFileService, FileService>()
                 .AddSingleton<ILoggerService, LoggerService>()
-                .AddTransient<IActionService, ActionService>()
                 .AddTransient<IConfigProvider, ConfigProvider>()
-                .AddTransient<IFileService, FileService>()
+                .AddTransient<Actions>()
                 .AddTransient<App>()
                 .BuildServiceProvider();
 

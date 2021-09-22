@@ -7,62 +7,51 @@ namespace TrueLogger
         private const int Cycles = 100;
         private const int MaxRnd = 3;
 
-        private readonly IActionService _actionService;
+        private readonly Actions _actions;
         private readonly IConfigService _configService;
-        private readonly IFileService _fileService;
         private readonly ILoggerService _loggerService;
 
         private readonly Random _rnd = new Random();
 
         public App(
-            IActionService actionService,
             IConfigService configService,
-            IFileService fileService,
-            ILoggerService loggerService)
+            ILoggerService loggerService,
+            Actions actions)
         {
-            _actionService = actionService;
+            _actions = actions;
             _configService = configService;
-            _fileService = fileService;
             _loggerService = loggerService;
         }
 
         public void Start()
         {
-            EnvironmentPrepair();
             RandomMethod();
 
-            Console.WriteLine($"{Environment.NewLine}Log has been successfully written to \"{_loggerService.Path}\"{Environment.NewLine}");
-            Console.ReadKey();
-        }
+            if (_configService.FilePath != null)
+            {
+                Console.WriteLine($"{Environment.NewLine}Log has been successfully written to \"{_configService.FilePath}\"{Environment.NewLine}");
+            }
+            else
+            {
+                Console.WriteLine($"{Environment.NewLine}There is error occured! File \"{_configService.FilePath}\" not found!{Environment.NewLine}");
+            }
 
-        private void EnvironmentPrepair()
-        {
-            _fileService.MakeDir(_configService.DirConfig.DirPath);
-            _fileService.CleanDir(_configService.DirConfig.DirPath, _configService.DirConfig.DirSize);
+            Console.ReadKey();
         }
 
         private void RandomMethod()
         {
             for (var i = 0; i < Cycles; i++)
             {
-                var rnd = _rnd.Next(MaxRnd);
-
                 try
                 {
-                    switch (rnd)
+                    var rnd = _rnd.Next(MaxRnd) switch
                     {
-                        case 0:
-                            _actionService.InfoLog();
-                            break;
-                        case 1:
-                            _actionService.WarningLog();
-                            break;
-                        case 2:
-                            _actionService.ErrorLog();
-                            break;
-                        default:
-                            throw new ArgumentException();
-                    }
+                        0 => _actions.InfoLog(),
+                        1 => _actions.WarningLog(),
+                        2 => _actions.ErrorLog(),
+                        _ => throw new ArgumentException(),
+                    };
                 }
                 catch (ArgumentException ae)
                 {

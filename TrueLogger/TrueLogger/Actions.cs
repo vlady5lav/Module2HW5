@@ -2,11 +2,11 @@
 
 namespace TrueLogger
 {
-    public class ActionService : IActionService
+    public class Actions
     {
         private readonly ILoggerService _loggerService;
 
-        public ActionService(
+        public Actions(
             ILoggerService loggerService)
         {
             _loggerService = loggerService;

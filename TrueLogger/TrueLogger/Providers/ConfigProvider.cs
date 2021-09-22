@@ -17,8 +17,6 @@ namespace TrueLogger
         }
 
         public Config Config => _config;
-        public DirConfig DirConfig => _config.DirConfig;
-        public LoggerConfig LoggerConfig => _config.LoggerConfig;
 
         private Config Init()
         {
@@ -45,15 +43,13 @@ namespace TrueLogger
                 DirConfig = new DirConfig()
                 {
                     DirSize = 3,
-                    DirPath = "logs/",
-                    BackupPath = "backups/",
+                    DirPath = "logs",
                 },
                 LoggerConfig = new LoggerConfig()
                 {
-                    LineSeparator = 10,
                     FileExtension = ".txt",
-                    FileNameFormat = string.Empty,
-                    TimeFormat = "hh.mm.ss dd.MM.yyyy",
+                    FileNameFormat = "log_",
+                    TimeFormat = "yyyy.MM.dd_HH.mm.ss",
                 }
             };
         }

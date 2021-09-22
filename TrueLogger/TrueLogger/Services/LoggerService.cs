@@ -1,39 +1,33 @@
 ﻿using System;
-using System.Text;
 
 namespace TrueLogger
 {
     public class LoggerService : ILoggerService
     {
-        private readonly StringBuilder _log;
         private readonly IConfigService _configService;
+        private readonly IDisposable _streamWriter;
         private readonly IFileService _fileService;
-
-        private readonly string _path;
-        private readonly string _dir;
-        private readonly string _extension;
-        private readonly string _fileNameFormat;
-        private readonly string _timeFormat;
+        private readonly string _filePath;
 
         public LoggerService(
             IConfigService configService,
             IFileService fileService)
         {
-            _log = new StringBuilder();
             _configService = configService;
             _fileService = fileService;
-
-            _dir = _configService.DirConfig.DirPath;
-            _fileNameFormat = _configService.LoggerConfig.FileNameFormat;
-            _timeFormat = DateTime.UtcNow.ToString(_configService.LoggerConfig.TimeFormat);
-            _extension = _configService.LoggerConfig.FileExtension;
-
-            _path = $"{_dir}{_fileNameFormat}{_timeFormat}{_extension}";
+            _filePath = _configService.FilePath;
+            _streamWriter = StreamPrepairer();
         }
 
-        public string Log => _log.ToString();
-
-        public string Path => _path;
+        /*
+         * Not needed in our case
+         *
+        ~LoggerService()
+        {
+            _fileService.CloseFileStream(_streamWriter);
+            _streamWriter.Dispose();
+        }
+        */
 
         public void LogEventInfo(string msg)
         {
@@ -50,16 +44,24 @@ namespace TrueLogger
             LogEvent(LogLevel.Error, msg);
         }
 
-        private void LogEvent(LogLevel logLevel, string msg)
+        public void LogEvent(LogLevel logLevel, string msg)
         {
-            var logMsg = $"{DateTime.UtcNow.ToString(_configService.LoggerConfig.TimeFormat)}: {logLevel}: {msg}";
+            var logMsg = $"{DateTime.UtcNow.ToString(_configService.TimeFormat)}: {logLevel}: {msg}";
             Console.WriteLine(logMsg);
             LogWrite(logMsg);
         }
 
+        private IDisposable StreamPrepairer()
+        {
+            _fileService.MakeDir(_configService.DirPath);
+            _fileService.CleanDir(_configService.DirPath, _configService.DirSize);
+            _fileService.MakeFile(_filePath);
+            return _fileService.OpenFileStream(_filePath);
+        }
+
         private void LogWrite(string txt)
         {
-            _fileService.WriteLine(_path, txt);
+            _fileService.WriteLineToFile(_streamWriter, txt);
         }
     }
 }
